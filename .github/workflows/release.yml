@@ -621,6 +621,14 @@ jobs:
       # rather than its exit code -- for a missing version of an existing package, older npm exits 0 and
       # newer npm exits 1, but the output is non-empty only when the version exists. Re-running the tag
       # after a mid-chain failure (e.g. Trusted Publisher not configured yet) picks up where it left off.
+      # Before anything is published: every name this job will push must already exist on npm, or
+      # be one the run can create. npm's trusted publishing is configured per package, so a name npm
+      # has never seen cannot be published here at all -- and the loop would find that out partway
+      # through, having already published everything alphabetically before it. 0.2.13 lost a run to
+      # exactly that. Fail here instead, naming what needs a first publish by hand.
+      - name: Every package this publishes already exists on npm
+        run: node scripts/check-publishable.mjs --registry --strict
+
       - name: Publish to npm
         run: |
           TAG="${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}"
@@ -636,7 +644,16 @@ jobs:
           # The @penguinharness/* plugin packages go first: core declares them as workspace:*
           # deps, rewritten to their versions at publish time, so they must exist first.
           for dir in plugins/*/; do
-            name="@penguinharness/$(basename "$dir")"
+            # Read the name and the private flag out of the manifest rather than building a name
+            # from the directory: plugins/sandbox-* are @prismshadow/penguin-plugin-sandbox-* and
+            # private, so a derived name queries a package that does not exist and filters to
+            # nothing. Publishing is driven by what each package says it is.
+            name="$(node -p "require('./$dir/package.json').name")"
+            private="$(node -p "require('./$dir/package.json').private === true")"
+            if [ "$private" = "true" ]; then
+              echo "$name is private, not published."
+              continue
+            fi
             if [ -n "$(npm view "$name@$V" version 2>/dev/null || true)" ]; then
               echo "$name@$V already on the registry, skipping."
               continue
