@@ -313,7 +313,7 @@ Benchmark 挂在 Project 上而非某个 Agent 上：一个 Benchmark 评测过�
 | GET / POST | /:orgId/channels/:channelId/messages | 某一天的消息（`?date=yyyy-mm-dd`，缺省为组织时区的今天）及调用方的未读与 @ 计数 / 发送 `{text, refs?}`；@ 从正文解析，且必须都是频道成员。`system` 消息在英文 `text` 之外还带 `notice`——一个 `kind`（`employee_joined`、`employee_left`、`channel_created`、`channel_archived`、`channel_unarchived`、`channel_joined`、`channel_invited`、`channel_left`、`channel_removed`、`budget_warned`、`budget_paused`，以及遗留的 `ticket_blocked`、`ticket_done`、`ticket_rejected`——这三种已不再写入，保留只是为了让磁盘上已有的行仍能渲染）与一组字符串 `params`——客户端据此按读者的语言渲染该句；该字段出现之前写下的消息没有它 |
 | POST | /:orgId/channels/:channelId/read | `{upTo}`——调用方在该频道的已读游标 |
 | GET | /:orgId/finance | 按员工（本人与沿汇报线累计）、按工单（沿 `Parent` 上卷）的支出、逐日趋势与告警；`?period=yyyy-mm` |
-| GET | /:orgId/sessions | 组织的工位会话与按工单分组的工单会话 |
+| GET | /:orgId/sessions | 组织的工位会话与按工单分组的工单会话；工位会话启用了消息渠道绑定时带 `messagingChannel`，与该 Session 自身的列表行一致 |
 
 频道相关错误：`channel_not_found`（404，频道 id 不合法时同样如此）、`channel_exists`（409）、`channel_archived`（409，归档频道在取消归档前不接受写入）、`not_a_member`（403，无成员身份的读取、发言与邀请，以及员工尝试仅限人的操作）、`all_hands_immutable`（400，归档 `default_channel` 或编辑其成员）、`mention_not_member`（400，消息提及了不在该频道的对象，整条不写入）、`invalid_principal`（400）。
 
@@ -325,7 +325,7 @@ Benchmark 挂在 Project 上而非某个 Agent 上：一个 Benchmark 评测过�
 
 | 方法 | 路径 | 说明 |
 | --- | --- | --- |
-| GET | /agents/:agentId/sessions | Session 列表（含运行状态）；无论由哪个客户端创建，所有行都会列出 |
+| GET | /agents/:agentId/sessions | Session 列表（含运行状态）；无论由哪个客户端创建，所有行都会列出；带 `excludeOrg=1` 时只列用户自己的行——组织的工位会话、工单会话及其派生的子会话同时从分页与 `counts=1` 的统计中剔除（开发模式的会话列表即以此请求） |
 | POST | /agents/:agentId/sessions | 创建 Session：`{modelId?, provider?, workspace?, approvalMode?, client?, source?}` → 201。`client` 是存入索引行的创建客户端标记（CLI 传 `"cli"`，缺省 `"web"`）——仅作来源信息，绝不参与列表过滤；`source` 只接受 `"benchmark"`（Benchmark 评估或优化创建），`subagent` 与 `schedule` 由服务端自己写入 `org` 是服务端为组织的工位与工单会话（公司模式）自行写入的值，客户端不能传。 |
 | GET | /dirs?path= | 服务器端目录浏览（Workspace 选择器数据源） |
 

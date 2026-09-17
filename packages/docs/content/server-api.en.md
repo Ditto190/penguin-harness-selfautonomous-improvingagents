@@ -313,7 +313,7 @@ All paths below are under `/api/projects/:projectId/organizations`. Every route 
 | GET / POST | /:orgId/channels/:channelId/messages | A day's messages (`?date=yyyy-mm-dd`, default today in the organization's timezone) with the caller's unread and mention counts / send `{text, refs?}`; mentions are resolved from the text and must all be members. A `system` line also carries `notice` — a `kind` (`employee_joined`, `employee_left`, `channel_created`, `channel_archived`, `channel_unarchived`, `channel_joined`, `channel_invited`, `channel_left`, `channel_removed`, `budget_warned`, `budget_paused`, and the legacy `ticket_blocked`, `ticket_done`, `ticket_rejected` — nothing writes those three any more, they are kept so lines already on disk still render) and string `params` — beside its English `text`, so a client renders the sentence in the reader's language; lines written before the field have none |
 | POST | /:orgId/channels/:channelId/read | `{upTo}` — the caller's read cursor in this channel |
 | GET | /:orgId/finance | Spend per employee (own and cumulative along the reporting line), per ticket (rolled up along `Parent`), daily trend, alerts; `?period=yyyy-mm` |
-| GET | /:orgId/sessions | The organization's desk sessions and ticket sessions grouped by ticket |
+| GET | /:orgId/sessions | The organization's desk sessions and ticket sessions grouped by ticket; a desk whose Session has an enabled messaging binding carries its `messagingChannel`, as the Session's own row does |
 
 Channel errors: `channel_not_found` (404 — also for an id no channel could carry), `channel_exists` (409), `channel_archived` (409 — an archived channel takes no writes until it is unarchived), `not_a_member` (403 — reading, posting or inviting without membership, and any people-only action attempted by an employee), `all_hands_immutable` (400 — archiving `default_channel` or editing its membership), `mention_not_member` (400 — the message names principals the channel does not hold; nothing is written), `invalid_principal` (400).
 
@@ -325,7 +325,7 @@ A desk session is driven by three things only: a calendar event, a channel `@`-m
 
 | Method | Path | Description |
 | --- | --- | --- |
-| GET | /agents/:agentId/sessions | List Sessions (including run state); every row is listed whichever client created it |
+| GET | /agents/:agentId/sessions | List Sessions (including run state); every row is listed whichever client created it, unless `excludeOrg=1` asks for the user's own rows only — an organization's desk, ticket and sub-sessions then leave the page and the `counts=1` totals together (what development mode's list requests) |
 | POST | /agents/:agentId/sessions | Create a Session: `{modelId?, provider?, workspace?, approvalMode?, client?, source?}` → 201. `client` is the creating-client hint stored on the row (`"cli"` from the CLI; default `"web"`) — informational provenance, never a list filter; `source` accepts only `"benchmark"` (a Benchmark evaluation or optimization), since `subagent` and `schedule` are set by the server itself `org` is the value the server itself writes for an organization's desk and ticket sessions (company mode); a client cannot pass it. |
 | GET | /dirs?path= | Server-side directory browser (backs the Workspace picker) |
 
