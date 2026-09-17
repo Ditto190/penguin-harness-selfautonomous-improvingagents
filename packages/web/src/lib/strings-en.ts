@@ -5,6 +5,7 @@
  * "agent" is a common noun: lowercase mid-sentence, capitalized only at the start
  * of a label/sentence or in a proper name (Agent State, AgentHub).
  */
+import type { PeakWindows } from "../features/models/model-grouping";
 import type { Strings } from "./strings";
 
 export const en: Strings = {
@@ -1127,8 +1128,19 @@ export const en: Strings = {
     recommendedGroup: "Recommended",
     discountBadge: (pct: number): string => `${pct}% off`,
     discountTitle: (pct: number): string => `Promotion: ${pct}% off the list price`,
-    offPeakTitle: (pct: number): string =>
-      `Off-peak rate: ${pct}% off list. Peak hours bill at list price — 09:00–12:00 and 14:00–18:00 Beijing time, Monday to Friday`,
+    offPeakTitle: (pct: number, peak: PeakWindows): string => {
+      const day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const days = peak.everyDay
+        ? "every day"
+        : peak.days
+            .map(([from, to]) =>
+              from === to ? day[from - 1] : `${day[from - 1]} to ${day[to - 1]}`,
+            )
+            .join(", ");
+      const clock = (hour: number): string => `${String(hour).padStart(2, "0")}:00`;
+      const hours = peak.hours.map(([from, to]) => `${clock(from)}–${clock(to)}`).join(" and ");
+      return `Off-peak rate: ${pct}% off list. Peak hours bill at list price — ${hours} Beijing time, ${days}`;
+    },
     visionModelBadge: "Proxy vision",
     usedTokens: (v: string) => `${v} toks`,
     usedTokensTitle: "Tokens this model has used, all time",
