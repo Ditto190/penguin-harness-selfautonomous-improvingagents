@@ -3007,6 +3007,9 @@ Scenarios:
         text: "Pick a Benchmark, press Use → Optimize, set a target score and send; a new version is kept only when the score strictly improves.",
       },
     ],
+    /** The first step card's text for a Project member: no Create manually, which is the owner's. */
+    guideCreateMember:
+      "Press Create with AI at the top right to have AI write a set of cases for an agent and take its baseline score.",
     searchPlaceholder: "Search titles, descriptions or tested agents",
     noMatches: "No Benchmark matches",
     filterByAgent: (agentId: string): string => `Benchmarks that evaluated ${agentId}`,
@@ -3029,6 +3032,10 @@ Scenarios:
       "The cases' difficulty could not be calibrated; delete this Benchmark and create it again",
     creationFailedDetail:
       "Calibration of this Benchmark never completed, so it cannot be evaluated or optimized; delete it and create it again.",
+    /** The two lines above for a Project member: no delete step, since deleting is the owner's. */
+    creationFailedHintMember: "The cases' difficulty could not be calibrated",
+    creationFailedDetailMember:
+      "Calibration of this Benchmark never completed, so it cannot be evaluated or optimized.",
     testedAgents: "Tested agents",
     lastEvaluated: (when: string): string => `last evaluated ${when}`,
     sparklineLabel: (n: number): string => `Score trend over ${n} evaluation${n === 1 ? "" : "s"}`,
