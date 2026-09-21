@@ -1284,6 +1284,21 @@ export const zh = {
       already_delivered: "该授权结果已经交付，请重新开始。",
       apply_failed: "API key 已取得，但未能写入模型组。可以直接重试，无需再次授权。",
     },
+    // 魔搭走的是授权中转层：harness 不直接与魔搭对话，中转层拿着 client secret 换回
+    // api-inference token。access token 会写入模型表；refresh token 只保存在服务端 DB。
+    modelScopeKeyIntro: (n: number): string =>
+      `授权后会自动获取一个魔搭 API token，并写入该分组下全部 ${n} 个预置模型，覆盖它们当前的 key；后续请求会在服务端静默续期，连续续期失败时会提示你重新授权。`,
+    modelScopeKeyAppliedBody: (n: number): string =>
+      `已完成授权：魔搭 API token 已配置到 ${n} 个模型上，可以直接使用了。`,
+    modelScopeKeyErrors: {
+      unreachable: "无法连接授权中转层，请检查网络后重新开始。",
+      upstream_failed: "中转层未能完成授权，请重新开始。",
+      invalid_key: "中转层未返回可用的 API token，请重新开始。",
+      expired: "授权已过期，请重新开始。",
+      locked: "授权已锁定，请重新开始。",
+      already_delivered: "该授权结果已经交付，请重新开始。",
+      apply_failed: "API token 已取得，但未能写入模型组。可以直接重试，无需再次授权。",
+    },
     // Providers with separate domestic / international endpoints: note on the default
     // endpoint used when left blank via env var (the other side's key needs an explicit
     // base URL). Written to match AgentHub's actual behavior; rendered wherever the env fallback hint appears.
@@ -4214,6 +4229,7 @@ Benchmark：
       agent_deleting: "该 Agent 正在删除中。",
       project_exists: "该 Project id 已被占用。",
       project_not_found: "该 Project 已不存在，或你没有访问权限。",
+      modelscope_refresh_failed: "魔搭授权连续自动续期失败，请在「模型」页重新授权。",
       cannot_delete_last_project: "这是最后一个 Project，不能删除。",
       user_exists: "该用户名已被占用。",
       user_not_found: "该用户已不存在。",

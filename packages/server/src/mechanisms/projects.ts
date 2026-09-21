@@ -27,6 +27,7 @@ import type { UserRow } from "../db/repos/users.js";
 import type { RawTable, UtilityCompletion } from "../services/project-config-service.js";
 import type {
   ListEndpointModelsOptions,
+  ModelRequestContext,
   ModelRef,
   PluginTable,
   ProjectConfig,
@@ -147,7 +148,17 @@ export abstract class ProjectConfigStore extends Interface<{
   getModels(projectId: string): Promise<ModelsResponse>;
   updateModels(projectId: string, req: ModelsUpdateRequest): Promise<ModelsResponse>;
   setGroupApiKey(projectId: string, provider: string, apiKey: string): Promise<number>;
+  setGroupApiKeyWithProviderAuthToken(
+    projectId: string,
+    provider: string,
+    apiKey: string,
+    token: Omit<ModelProviderAuthToken, "provider" | "updatedAt">,
+    options?: { expectedRefreshToken?: string },
+  ): Promise<number>;
   getGroupApiKey(projectId: string, provider: string): Promise<string | undefined>;
+  setModelApiKeyResolver(
+    resolver: (context: ModelRequestContext) => Promise<string | undefined>,
+  ): void;
   mergePlatformModels(
     projectId: string,
     provider: string,
@@ -172,6 +183,20 @@ export abstract class ModelPromotions extends Interface<{
   replaceAll(projectId: string, rows: readonly ModelPromotion[]): void;
   /** Replaces the promotions of one provider group, in one transaction. */
   replaceProvider(projectId: string, provider: string, rows: readonly ModelPromotion[]): void;
+}>() {}
+
+export interface ModelProviderAuthToken {
+  provider: string;
+  refreshToken: string;
+  accessTokenExpiresAt?: string;
+  updatedAt: string;
+}
+
+/** Server-side OAuth refresh metadata for provider groups (web.db `model_provider_auth_tokens`). */
+export abstract class ModelProviderAuthTokens extends Interface<{
+  get(projectId: string, provider: string): ModelProviderAuthToken | undefined;
+  upsert(projectId: string, row: Omit<ModelProviderAuthToken, "updatedAt">): void;
+  delete(projectId: string, provider: string): void;
 }>() {}
 
 /** ModelOAuth: the mechanism ModelOAuthService implements. */

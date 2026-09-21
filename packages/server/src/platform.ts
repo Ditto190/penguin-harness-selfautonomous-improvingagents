@@ -69,6 +69,7 @@ import { UiPrefsRepo } from "./db/repos/ui-prefs.js";
 import { SessionsRepo } from "./db/repos/sessions.js";
 import { ProjectsRepo } from "./db/repos/projects.js";
 import { ModelPromotionsRepo } from "./db/repos/model-promotions.js";
+import { ModelProviderAuthTokensRepo } from "./db/repos/model-provider-auth-tokens.js";
 import { MembersRepo } from "./db/repos/members.js";
 import { AgentsRepo } from "./db/repos/agents.js";
 import { UsageRepo } from "./db/repos/usage.js";
@@ -84,6 +85,7 @@ import { UsageService } from "./services/usage-service.js";
 import { ProjectConfigService } from "./services/project-config-service.js";
 import { ModelOAuthService } from "./services/model-oauth-service.js";
 import { PlatformAuth, PlatformAuthProvider } from "./services/platform-auth-service.js";
+import { ModelScopeAuth, ModelScopeAuthProvider } from "./services/modelscope-auth-service.js";
 import { TraceIndexService } from "./services/trace-index.js";
 import { TraceService } from "./services/trace-service.js";
 import { WorkspaceFilesService } from "./services/workspace-files-service.js";
@@ -125,6 +127,7 @@ import {
   AgentIndex,
   Members,
   ModelOAuth,
+  ModelProviderAuthTokens,
   ProjectConfigStore,
   ProjectLifecycle,
   Projects,
@@ -255,6 +258,7 @@ export class IdentityModule {}
   children: [
     ProjectsRepo,
     ModelPromotionsRepo,
+    ModelProviderAuthTokensRepo,
     MembersRepo,
     AgentsRepo,
     ProjectAccess,
@@ -262,6 +266,7 @@ export class IdentityModule {}
     ProjectConfigService,
     ModelOAuthService,
     PlatformAuthProvider,
+    ModelScopeAuthProvider,
     ProjectsRoutes,
     ProjectAdminRoutes,
   ],
@@ -272,8 +277,10 @@ export class IdentityModule {}
     Access,
     ProjectLifecycle,
     ProjectConfigStore,
+    ModelProviderAuthTokens,
     ModelOAuth,
     PlatformAuth,
+    ModelScopeAuth,
     InitialProjectProvisioner,
   ],
 })

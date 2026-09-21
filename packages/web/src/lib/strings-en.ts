@@ -1280,6 +1280,24 @@ export const en: Strings = {
       apply_failed:
         "The API key was received but could not be written to the model group. Retry without authorizing again.",
     },
+    // ModelScope goes through the authorization bridge: the harness never talks to ModelScope
+    // itself, and the bridge holds the client secret that buys an api-inference token. The
+    // access token is written to the model table; the refresh token stays in the server DB.
+    modelScopeKeyIntro: (n: number): string =>
+      `Authorization automatically obtains a ModelScope API token and writes it to all ${n} preset models in this group, replacing their current key; later requests renew it silently on the server, and repeated renewal failures prompt you to authorize again.`,
+    modelScopeKeyAppliedBody: (n: number): string =>
+      `Authorized. The ModelScope API token is set on ${n} model${n === 1 ? "" : "s"} and ready to use.`,
+    modelScopeKeyErrors: {
+      unreachable:
+        "The authorization bridge could not be reached. Check the network and start again.",
+      upstream_failed: "The bridge could not complete authorization. Start again.",
+      invalid_key: "The bridge returned no usable API token. Start again.",
+      expired: "The authorization expired. Start again.",
+      locked: "The authorization was locked. Start again.",
+      already_delivered: "That authorization was already delivered. Start again.",
+      apply_failed:
+        "The API token was received but could not be written to the model group. Retry without authorizing again.",
+    },
     providerEnvNotes: {
       zhipu:
         "Defaults to the Z.AI global endpoint (api.z.ai); keys from bigmodel.cn need base URL https://open.bigmodel.cn/api/paas/v4",
@@ -4253,6 +4271,8 @@ Scenarios:
       agent_deleting: "This agent is being deleted.",
       project_exists: "This Project id is already taken.",
       project_not_found: "This Project no longer exists, or you do not have access.",
+      modelscope_refresh_failed:
+        "ModelScope authorization could not be renewed after repeated attempts. Re-authorize it on the Models page.",
       cannot_delete_last_project: "This is the last Project and cannot be deleted.",
       user_exists: "This username is already taken.",
       user_not_found: "This user no longer exists.",
